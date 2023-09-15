@@ -7,9 +7,9 @@ import jsonpickle
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'Uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
-app.register_blueprint(upload_bp, url_prefix='/upload')  # يمكنك تحديد البادئة هنا
+app.register_blueprint(upload_bp, url_prefix='/upload') 
 es = Elasticsearch([
-        {'host': '127.0.0.1', 'port': 9200, "scheme": "https"}
+        {'host': '127.0.0.1', 'port': 9200, "scheme": "http"}
     ], verify_certs=False)
 @app.route('/', methods=['GET', 'POST'])
 def index():
