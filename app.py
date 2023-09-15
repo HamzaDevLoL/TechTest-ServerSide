@@ -33,4 +33,4 @@ def download(name):
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.100.166',debug=False)
+    app.run(host='0.0.0.0',debug=False)
