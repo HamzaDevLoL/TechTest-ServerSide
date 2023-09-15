@@ -10,7 +10,7 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
 app.register_blueprint(upload_bp, url_prefix='/upload')  # يمكنك تحديد البادئة هنا
 es = Elasticsearch([
         {'host': '127.0.0.1', 'port': 9200, "scheme": "https"}
-    ],basic_auth=('elastic', 'Qbu6pDBxqb9ftwpgMYC0EOl8'))
+    ], verify_certs=False)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return 'Hello World!'
