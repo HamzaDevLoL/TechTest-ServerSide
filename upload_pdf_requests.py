@@ -6,7 +6,7 @@ import PyPDF2
 from elasticsearch import Elasticsearch
 from utils.filter import extractStudentInfo , textFilterToArray
 es = Elasticsearch([
-        {'host': '0c4f08cf97b74583acaddca9acbe9600.us-central1.gcp.cloud.es.io', 'port': 9243, "scheme": "https"}
+        {'host': '127.0.0.1', 'port': 9200, "scheme": "https"}
     ],basic_auth=('elastic', 'Qbu6pDBxqb9ftwpgMYC0EOl8'))
 
 upload_bp = Blueprint('upload', __name__)
