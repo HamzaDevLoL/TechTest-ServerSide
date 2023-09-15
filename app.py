@@ -1,7 +1,6 @@
 from flask import Flask,send_file
 from upload_pdf_requests import upload_bp
 from elasticsearch import Elasticsearch
-import json
 import jsonpickle
 
 
