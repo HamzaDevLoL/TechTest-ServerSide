@@ -44,7 +44,7 @@ def upload_pdf():
                 extracted_text += page_text
             array = textFilterToArray(extracted_text)
             for item in array:
-                es.index(index='students',body=extractStudentInfo(item,filename))
+                es.index(index='student',body=extractStudentInfo(item,filename))
             return {'message': 'File uploaded successfully' }, 200
 
     return {'message': 'Invalid file type'}, 400

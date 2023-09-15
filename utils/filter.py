@@ -1,5 +1,19 @@
 import os
 
+def reversNames(text):
+    words = text.split(" ")[::-1]
+
+    temp = ''
+    i = 0
+    for x in range(len(words)):
+        print(i)
+        if i < len(words)-1 and words[i+1] =='عبد':
+            temp += words[i+1]+' '+words[i]+' '
+            i += 2
+        elif i < len(words):
+            temp += words[i]+' '
+            i+= 1
+    return temp
 
 
 
@@ -46,6 +60,9 @@ def extractStudentInfo(text,pdfName):
             list.append('غ')
         else:
             temp += text[i]
+    
+    list[2] = reversNames(list[2])
+
     return {'name': list[2],'StudientID': list[1] ,"pdfName":pdfName,'SequenceInPDF':list[11] ,
             'Islamic':list[0],'Arbic':list[3],'English':list[4],'Biology':list[5],'math':list[6],'Chemistry':list[7] ,'Physics':list[8],'Sum':list[9] , 'result':list[10]}
 

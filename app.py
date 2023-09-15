@@ -17,7 +17,7 @@ def index():
 
 @app.get('/search/<name>')
 def search(name):
-    search = es.search(index='students', body= {"query": {
+    search = es.search(index='student', body= {"query": {
         "match": {
             "name": str(name) 
         }}
