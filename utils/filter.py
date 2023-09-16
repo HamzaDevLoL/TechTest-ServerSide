@@ -2,22 +2,6 @@ import os
 import re
 
 
-def reversNames(text):
-    words = text.split(" ")[::-1]
-
-    temp = ''
-    i = 0
-    for x in range(len(words)):
-        print(i)
-        if i < len(words)-1 and words[i+1] == 'عبد':
-            temp += words[i+1]+' '+words[i]+' '
-            i += 2
-        elif i < len(words):
-            temp += words[i]+' '
-            i += 1
-    return temp
-
-
 def textFilterToArray(text):
     start_index = text.index(': الفـــــرع')
     end_index = text.index('الحيائيالمعدل') + len('الحيائيالمعدل')
@@ -40,7 +24,7 @@ def textFilterToArray(text):
     return array
 
 
-def extract_name_and_result(text, pdfName):
+def extractStudentInfo(text, pdfName):
     words = re.findall(r'\b\w+\b', text)[::-1]
     passing_grades = ["ناجح", "راسب"]
     writtenGrades = ['صفر', 'واحد', 'اثنان', 'ثلاث',
@@ -49,7 +33,7 @@ def extract_name_and_result(text, pdfName):
     result = ""
     grades = []
     for word in words:
-        if word not in passing_grades and len(word) > 1 and any(char.isnumeric() for char in word) == False and any(word.find(grade) == -1 for grade in writtenGrades):
+        if word not in passing_grades and len(word) > 1 and all(char.isnumeric() for char in word) == False and word not in writtenGrades and all(x < len(word)-1 and (word[x] != 'غ' and word[x+1] != 'غ') for x in range(len(word))):
             if word == 'عبدا':
                 name += 'عبد الله' + " "
             else:
@@ -57,37 +41,49 @@ def extract_name_and_result(text, pdfName):
         elif word in passing_grades:
             result = word
         elif any(word.find(grade) != -1 for grade in writtenGrades):
-            temp = []
-            for grade in writtenGrades[::-1]:
-                if word.find(grade) != -1:
-                    temp.append(grade)
-                    word = word.replace(grade, '')
-            if (len(grades) > 0):
-                grades.append(word)
-            for i in temp:
-                grades.append(i)
+            tempList = []
+            temp = ''
+            for c in word:
+                if c == 'غ':
+                    tempList.append('غ')
+                    word = word.replace('غ', '')
+                elif c.isnumeric():
+
+                    temp += c
+                    word = word.replace(c, '')
+                else:
+                    if temp != '':
+                        tempList.append(temp)
+                        temp = ''
+                    for i in range(len(writtenGrades)):
+                        if word.find(writtenGrades[i]) != -1:
+                            tempList.append(writtenGrades[i])
+                            word = word.replace(writtenGrades[i], '')
+            if temp != '':
+                tempList.append(temp)
+                temp = ''
+            for i in range(len(tempList)):
+                grades.append(tempList[i])
         else:
+
             if word == 'غ':
                 grades.append('غ')
-                print('==========1===========')
-
             elif any(char == 'غ' for char in word):
                 temp = ''
                 counter = 0
                 for w in word:
                     if w == 'غ':
+
                         counter += 1
                     if w.isnumeric():
                         temp += w
                 if (temp != ''):
                     grades.append(temp)
                 for i in range(counter):
-                    print(word)
                     grades.append('غ')
             elif word.isnumeric():
                 grades.append(word)
-
-    name = name.strip()
+    print(text)
     json = {'name': name, 'StudientID': grades[10], "pdfName": pdfName, 'SequenceInPDF': grades[2],
             'Islamic': grades[11], 'Arbic': grades[9], 'English': grades[8], 'Biology': grades[7], 'math': grades[6], 'Chemistry': grades[5], 'Physics': grades[4], 'Sum': grades[3], 'result': result}
 
