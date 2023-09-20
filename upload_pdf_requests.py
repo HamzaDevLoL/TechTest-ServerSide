@@ -18,7 +18,6 @@ def allowed_file(filename):
 
 @upload_bp.route('/')
 def index():
-
     return 'Hello World!'
 
 

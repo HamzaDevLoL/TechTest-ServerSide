@@ -24,67 +24,98 @@ def textFilterToArray(text):
     return array
 
 
-def extractStudentInfo(text, pdfName):
-    words = re.findall(r'\b\w+\b', text)[::-1]
-    passing_grades = ["ناجح", "راسب"]
-    writtenGrades = ['صفر', 'واحد', 'اثنان', 'ثلاث',
-                     'اربع', 'خمس', 'ست', 'سبع', 'ثمان', 'تسع', 'عشر']
-    name = ""
-    result = ""
-    grades = []
-    for word in words:
-        if word not in passing_grades and len(word) > 1 and all(char.isnumeric() for char in word) == False and word not in writtenGrades and all(x < len(word)-1 and (word[x] != 'غ' and word[x+1] != 'غ') for x in range(len(word))):
-            if word == 'عبدا':
-                name += 'عبد الله' + " "
-            else:
-                name += word + " "
-        elif word in passing_grades:
-            result = word
-        elif any(word.find(grade) != -1 for grade in writtenGrades):
+def extractGrades(list, writtenGrades):
+    result = []
+    if 'غش' in list:
+        result = ['غش', 'غش', 'غش', 'غش', 'غش',
+                  'غش', 'غش']
+        for word in list:
+            if 'غش' in word:
+                list.remove(word)
+        return (result, list)
+    tempWords = []
+
+    for word in list:
+        tempList = []
+        temp = ''
+        if 'غ' in word and all(word.find(grade) == -1 for grade in writtenGrades) and len(word) < 12:
+            tempWords.append(word)
+
+            for i in range(len(word)):
+                if word[i] == 'غ':
+                    tempList.append('غ')
+                elif word[i].isnumeric():
+                    temp += word[i]
+                    if (i+1 < len(word) and not word[i + 1].isnumeric()) or i == len(word) - 1:
+                        tempList.append(temp)
+
+                        temp = ''
+            for item in tempList:
+                word = word.replace(item, '')
+                result.append(item)
+            if len(word) > 0:
+                del result[len(result)-1]
+                del tempWords[len(tempWords)-1]
+
+        elif all(char.isnumeric() or char == '%' for char in word) and len(word) < 12:
+            result.append(word.replace('%', ''))
+            tempWords.append(word)
+
+        elif any(word.find(grade) != -1 for grade in writtenGrades) and len(word) < 12:
+            tempWords.append(word)
+
+            indexesOfWrittenGrades = []
+            for i in range(len(writtenGrades)):
+                if word.find(writtenGrades[i]) != -1:
+                    indexesOfWrittenGrades.append((word.find(writtenGrades[i]), word.find(
+                        writtenGrades[i]) + len(writtenGrades[i]))
+                    )
+            indexesOfWrittenGrades.sort()
             tempList = []
             temp = ''
-            for c in word:
-                if c == 'غ':
-                    tempList.append('غ')
-                    word = word.replace('غ', '')
-                elif c.isnumeric():
-
-                    temp += c
-                    word = word.replace(c, '')
+            for i in range(len(word)):
+                if len(indexesOfWrittenGrades) > 0 and i == indexesOfWrittenGrades[0][0]:
+                    tempList.append(word[i:indexesOfWrittenGrades[0][1]])
+                    del indexesOfWrittenGrades[0]
                 else:
-                    if temp != '':
-                        tempList.append(temp)
-                        temp = ''
-                    for i in range(len(writtenGrades)):
-                        if word.find(writtenGrades[i]) != -1:
-                            tempList.append(writtenGrades[i])
-                            word = word.replace(writtenGrades[i], '')
-            if temp != '':
-                tempList.append(temp)
-                temp = ''
-            for i in range(len(tempList)):
-                grades.append(tempList[i])
-        else:
+                    if word[i] == 'غ':
+                        tempList.append('غ')
+                    elif word[i].isnumeric():
+                        temp += word[i]
+                        if (i+1 < len(word) and not word[i + 1].isnumeric()) or i == len(word) - 1:
+                            tempList.append(temp)
+                            temp = ''
+            for item in tempList:
+                word = word.replace(item, '')
+                result.append(item)
+            if len(word) > 0:
+                del result[len(result)-1]
+                del tempWords[len(tempWords)-1]
 
-            if word == 'غ':
-                grades.append('غ')
-            elif any(char == 'غ' for char in word):
-                temp = ''
-                counter = 0
-                for w in word:
-                    if w == 'غ':
+    if len(result) > 7:
+        temp = result
+        result = temp[0:6]
+        result.append(temp[len(temp)-1])
+    for item in tempWords:
+        list.remove(item)
+    return (result, list)
 
-                        counter += 1
-                    if w.isnumeric():
-                        temp += w
-                if (temp != ''):
-                    grades.append(temp)
-                for i in range(counter):
-                    grades.append('غ')
-            elif word.isnumeric():
-                grades.append(word)
-    print(text)
-    json = {'name': name, 'StudientID': grades[10], "pdfName": pdfName, 'SequenceInPDF': grades[2],
-            'Islamic': grades[11], 'Arbic': grades[9], 'English': grades[8], 'Biology': grades[7], 'math': grades[6], 'Chemistry': grades[5], 'Physics': grades[4], 'Sum': grades[3], 'result': result}
 
+def extractStudentInfo(text, pdfName):
+    writtenGrades = ['صفر', 'واحد', 'اثنان', 'ثلاث',
+                     'اربع', 'خمس', 'ست', 'سبع', 'ثمان', 'تسع', 'عشر']
+    words = (re.findall(r'\b\w+\b', text)[::-1])
+    del words[0:2]
+    result = words[1]
+    words.remove(result)
+    Sum = words[1]
+    SequenceInPDF = words[0]
+    del words[0:2]
+    temp = extractGrades(words, writtenGrades)
+    grades = temp[0]
+    ID = temp[1][len(temp[1])-1]
+    temp[1].remove(ID)
+    name = ' '.join(temp[1]).replace('عبدا', 'عبدالله')
+    json = {'name': name, 'StudientID': ID, "pdfName": pdfName, 'SequenceInPDF': SequenceInPDF,
+            'Islamic': grades[0], 'Arbic': grades[1], 'English': grades[2], 'Biology': grades[3], 'math': grades[4], 'Chemistry': grades[5], 'Physics': grades[6], 'Sum': Sum, 'result': result}
     return json
