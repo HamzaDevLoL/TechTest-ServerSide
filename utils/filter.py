@@ -24,11 +24,6 @@ def textFilterToArray(text):
     return array
 
 
-def reversName(name):
-
-    return ' '.join(re.findall(r'\b\w+\b', name)[::-1])
-
-
 def extractGrades(list, writtenGrades):
     result = []
     if 'غش' in list:
@@ -120,7 +115,7 @@ def extractStudentInfo(text, pdfName):
     grades = temp[0]
     ID = temp[1][len(temp[1])-1]
     temp[1].remove(ID)
-    name = reversName(' '.join(temp[1]).replace('عبدا', 'عبدالله'))
+    name = ' '.join(temp[1]).replace('عبدا', 'عبدالله')
     json = {'name': name, 'StudientID': ID, "pdfName": pdfName, 'SequenceInPDF': SequenceInPDF,
             'Islamic': grades[0], 'Arbic': grades[1], 'English': grades[2], 'Biology': grades[3], 'math': grades[4], 'Chemistry': grades[5], 'Physics': grades[6], 'Sum': Sum, 'result': result}
     return json
